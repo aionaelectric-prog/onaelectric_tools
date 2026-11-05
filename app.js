@@ -247,7 +247,7 @@ $('rPrint').onclick=()=>{const list=filteredMoves();
   $('printArea').innerHTML=`<div class="form" dir="${document.documentElement.dir}">${formHead(t('rep.report'),'',today())}<table><thead><tr><th>${t('col.formNo')}</th><th>${t('f.date')}</th><th>${t('f.moveType')}</th><th>${t('col.code')}</th><th>${t('col.tool')}</th><th>${t('f.person')}</th><th>${t('col.project')}</th><th>${t('col.cond')}</th></tr></thead><tbody>${list.map(m=>{const x=toolOf(m);return `<tr><td>${esc(m.formNo)}</td><td>${esc(m.date)}</td><td>${esc(v(m.type))}</td><td>${esc(x.code)}</td><td>${esc(x.name)}</td><td>${esc(mvPerson(m))}</td><td>${esc(mvProj(m))}</td><td>${esc(v(m.cond||''))}</td></tr>`}).join('')}</tbody></table></div>`;window.print();};
 
 /* ---------- fixed printable form ---------- */
-function formHead(title,no,date){return `<div class="fh"><span class="lg"><img src="assets/logo.jpeg" alt=""><b>${esc(S.settings.company)}</b></span><span>${no?t('form.no')+': '+no+' &nbsp; ':''}${t('f.date')}: ${esc(date)}</span></div><h3>${title}</h3>`;}
+function formHead(title,no,date){return `<div class="fh"><span class="lg"><img src="logo.jpeg" alt=""><b>${esc(S.settings.company)}</b></span><span>${no?t('form.no')+': '+no+' &nbsp; ':''}${t('f.date')}: ${esc(date)}</span></div><h3>${title}</h3>`;}
 function printForm(...nos){
   $('printArea').innerHTML=nos.map(no=>{const ms=S.moves.filter(m=>+m.formNo===+no);if(!ms.length)return'';const m0=ms[0],isOut=m0.type==='صرف';
     return `<div class="form" dir="${document.documentElement.dir}">${formHead(t(isOut?'form.out':'form.in'),no,m0.date)}
