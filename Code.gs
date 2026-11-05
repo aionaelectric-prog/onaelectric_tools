@@ -11,8 +11,8 @@
 const ACCESS_KEY = 'CHANGE_ME';
 
 const SCHEMA = {
-  tools:    {tab:'العدد',            cols:['id','code','name','brand','category','status','serial','purchaseDate','location','notes'],
-             heads:['المعرف','كود المعدة','اسم المعدة','الماركة','النوع','الحالة','الرقم التسلسلي','تاريخ الشراء','مكان التخزين','ملاحظات']},
+  tools:    {tab:'العدد',            cols:['id','code','name','brand','category','status','serial','purchaseDate','location','notes','qty','parts'],
+             heads:['المعرف','كود المعدة','اسم المعدة','الماركة','النوع','الحالة','الرقم التسلسلي','تاريخ الشراء','مكان التخزين','ملاحظات','العدد','الملحقات']},
   people:   {tab:'الموظفون',         cols:['id','code','name','role','dept','phone','notes'],
              heads:['المعرف','كود الموظف','اسم الموظف','الوظيفة','القسم / الشركة','رقم الهاتف','ملاحظات']},
   projects: {tab:'المشاريع',         cols:['id','name','location','notes'],
