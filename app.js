@@ -42,13 +42,14 @@ async function apiPost(body){
   const j = await r.json(); if(!j.ok) throw new Error(j.error==='bad_key'?t('msg.badKey'):j.error); return j;
 }
 async function boot(){
-  const url = LS.get('tm_url') || (window.APP_CONFIG && APP_CONFIG.API_URL) || '';
+  const url = (window.APP_CONFIG && APP_CONFIG.API_URL) || '';
   const key = LS.get('tm_key') || '';
+  if(url && !key){ showLogin(); return; }
   remote = url && key ? {url,key} : null;
   if(!remote){ S = loadCache() || fresh(); setSync('local'); banner(t('msg.localMode')); render(); return; }
   S = loadCache() || fresh(); render(); setSync('loading');
   try{ S = fromSheet(await apiGet()); saveCache(); setSync('ok'); banner(''); }
-  catch(e){ setSync('err'); banner(t('msg.loadFail')+' ('+e.message+')'); }
+  catch(e){ if(e.message===t('msg.badKey')){ LS.set('tm_key',''); showLogin(t('login.bad')); return; } setSync('err'); banner(t('msg.loadFail')+' ('+e.message+')'); }
   render();
 }
 function banner(m){const b=$('banner');b.textContent=m;b.classList.toggle('hide',!m);}
@@ -131,7 +132,7 @@ let cart=[], selected=new Set();
 function renderPool(){
   const q=$('outSearch').value.trim().toLowerCase(),cat=$('outCat').value;
   const list=S.tools.filter(x=>x.status==='متاحة'&&!cart.includes(x.id)&&(!cat||x.category===cat)&&(!q||(x.name+x.code).toLowerCase().includes(q)));
-  $('pool').innerHTML=list.length?list.map(x=>`<div class="chip${selected.has(x.id)?' sel':''}" draggable="true" data-id="${x.id}">${esc(x.name)}<small>${esc(x.code)} · ${esc(v(x.category))}</small></div>`).join(''):`<div class="muted">${t('out.none')}</div>`;
+  $('pool').innerHTML=list.length?list.map(x=>`<div class="chip${selected.has(x.id)?' sel':''}" draggable="true" data-id="${x.id}">${esc(x.name)}${qtyOf(x)>1?` <b>×${qtyOf(x)}</b>`:''}<small>${esc(x.code)} · ${esc(v(x.category))}${x.parts?' · '+parseParts(x.parts).length+' '+t('col.pieces'):''}</small></div>`).join(''):`<div class="muted">${t('out.none')}</div>`;
   $('cart').innerHTML=cart.length?`<div class="pool" style="min-height:0">${cart.map(id=>{const x=byId(S.tools,id);return x?`<div class="chip" data-id="${id}">${esc(x.name)}<small>${esc(x.code)} · ${t('out.remove')}</small></div>`:''}).join('')}</div>`:`<div class="ph">${t('out.drop')} ⬇<br><small>${t('out.dropHint')}</small></div>`;
   $('cartCount').textContent=cart.length?`(${cart.length} ${t('out.pieces')})`:'';
 }
@@ -182,20 +183,36 @@ $('doRet').onclick=busy($('doRet'),async()=>{
 });
 
 /* ---------- tools ---------- */
+/* parts are stored in the sheet as readable text: "name × qty | name × qty" */
+function parseParts(txt){return String(txt||'').split(/\n|\s\|\s/).map(s=>s.trim()).filter(Boolean).map(s=>{const m=s.match(/^(.*?)\s*[×xX*]\s*(\d+)\s*$/);return m&&m[1]?{n:m[1].trim(),q:+m[2]}:{n:s,q:1};});}
+const partsToCell=a=>a.map(p=>p.n+' × '+p.q).join(' | ');
+const partsToText=cell=>parseParts(cell).map(p=>p.n+' × '+p.q).join('\n');
+const qtyOf=x=>Math.max(1,parseInt(x.qty)||1);
+function partsHtml(x){const a=parseParts(x.parts);return a.length?`<div class="parts">${a.map(p=>`<span class="part">${esc(p.n)} <b>×${p.q}</b></span>`).join('')}</div>`:'';}
 $('addTool').onclick=busy($('addTool'),async()=>{
   const name=$('tName').value.trim();if(!name)return toast(t('msg.needName'));
-  const qty=Math.max(1,parseInt($('tQty').value)||1),ops=[],tmp=S.tools.slice();
-  for(let i=0;i<qty;i++){const row={id:uid('T'),code:nextCode('EQ',tmp,4),name,brand:$('tBrand').value.trim(),category:$('tCat').value,status:'متاحة',serial:'',purchaseDate:today(),location:$('tLoc').value.trim(),notes:$('tNotes').value.trim()};tmp.push(row);ops.push(up('tools',row));}
-  await commit(ops);['tName','tBrand','tNotes'].forEach(i=>$(i).value='');$('tQty').value=1;render();toast(t('msg.added')+' ('+qty+')');
+  const qty=Math.max(1,parseInt($('tQty').value)||1),copies=Math.max(1,parseInt($('tCopies').value)||1),parts=partsToCell(parseParts($('tParts').value)),ops=[],tmp=S.tools.slice();
+  for(let i=0;i<copies;i++){const row={id:uid('T'),code:nextCode('EQ',tmp,4),name,brand:$('tBrand').value.trim(),category:$('tCat').value,status:'متاحة',serial:'',purchaseDate:today(),location:$('tLoc').value.trim(),notes:$('tNotes').value.trim(),qty:String(qty),parts};tmp.push(row);ops.push(up('tools',row));}
+  await commit(ops);['tName','tBrand','tNotes','tParts'].forEach(i=>$(i).value='');$('tQty').value=1;$('tCopies').value=1;render();toast(t('msg.added')+' ('+copies+')');
 });
+let editing=null;
+function openEdit(id){const x=byId(S.tools,id);if(!x)return;editing=id;
+  $('eCat').innerHTML=S.settings.categories.map(c=>`<option value="${esc(c)}">${esc(v(c))}</option>`).join('');
+  $('eName').value=x.name||'';$('eBrand').value=x.brand||'';$('eCat').value=x.category;$('eQty').value=qtyOf(x);$('eLoc').value=x.location||'';$('eNotes').value=x.notes||'';$('eParts').value=partsToText(x.parts);
+  $('toolDlg').showModal();}
+$('eCancel').onclick=()=>$('toolDlg').close();
+$('eSave').onclick=busy($('eSave'),async()=>{const x=byId(S.tools,editing);if(!x)return;const name=$('eName').value.trim();if(!name)return toast(t('msg.needName'));
+  await commit([up('tools',Object.assign({},x,{name,brand:$('eBrand').value.trim(),category:$('eCat').value,qty:String(Math.max(1,parseInt($('eQty').value)||1)),location:$('eLoc').value.trim(),notes:$('eNotes').value.trim(),parts:partsToCell(parseParts($('eParts').value))}))]);
+  $('toolDlg').close();render();toast(t('msg.saved'));});
 function renderTools(){
   const q=$('tSearch').value.trim().toLowerCase(),cat=$('tFilterCat').value,st=$('tFilterSt').value;
-  const list=S.tools.filter(x=>(!cat||x.category===cat)&&(!st||x.status===st)&&(!q||(x.name+x.code+x.brand).toLowerCase().includes(q)));
-  $('toolsBody').innerHTML=list.length?list.map(x=>{const m=x.status==='مع موظف'?lastOut(x.id):null;return `<tr><td>${esc(x.code)}</td><td>${esc(x.name)}</td><td>${esc(x.brand)}</td><td>${esc(v(x.category))}</td><td>${tag(x.status)}</td><td>${m?esc(pName(m.personId)):''}</td><td>${esc(x.location)}</td><td style="white-space:nowrap">
+  const list=S.tools.filter(x=>(!cat||x.category===cat)&&(!st||x.status===st)&&(!q||(x.name+x.code+x.brand+(x.parts||'')).toLowerCase().includes(q)));
+  $('toolsBody').innerHTML=list.length?list.map(x=>{const m=x.status==='مع موظف'?lastOut(x.id):null;return `<tr><td>${esc(x.code)}</td><td>${esc(x.name)}</td><td class="num">${qtyOf(x)}</td><td>${partsHtml(x)}</td><td>${esc(x.brand)}</td><td>${esc(v(x.category))}</td><td>${tag(x.status)}</td><td>${m?esc(pName(m.personId)):''}</td><td>${esc(x.location)}</td><td style="white-space:nowrap">
+  <button class="b s sm" data-edit="${x.id}">${t('btn.edit')}</button>
   ${x.status!=='مع موظف'&&x.status!=='متاحة'?`<button class="b s sm" data-fix="${x.id}">${t('tools.fix')}</button>`:''}
-  ${x.status!=='مع موظف'?`<button class="b d sm" data-del="${x.id}">${t('btn.delete')}</button>`:''}</td></tr>`}).join(''):`<tr><td colspan="8" class="muted">${t('none')}</td></tr>`;
+  ${x.status!=='مع موظف'?`<button class="b d sm" data-del="${x.id}">${t('btn.delete')}</button>`:''}</td></tr>`}).join(''):`<tr><td colspan="10" class="muted">${t('none')}</td></tr>`;
 }
-$('toolsBody').onclick=async e=>{const f=e.target.dataset.fix,d=e.target.dataset.del;
+$('toolsBody').onclick=async e=>{const f=e.target.dataset.fix,d=e.target.dataset.del;if(e.target.dataset.edit)return openEdit(e.target.dataset.edit);
   try{ if(f){await commit([up('tools',Object.assign({},byId(S.tools,f),{status:'متاحة'}))]);render();}
   if(d&&confirm(t('msg.confirmDel'))){await commit([del('tools',d)]);render();} }catch(_){}};
 ['tSearch','tFilterCat','tFilterSt'].forEach(i=>$(i).oninput=renderTools);
@@ -252,8 +269,8 @@ function printForm(...nos){
   $('printArea').innerHTML=nos.map(no=>{const ms=S.moves.filter(m=>+m.formNo===+no);if(!ms.length)return'';const m0=ms[0],isOut=m0.type==='صرف';
     return `<div class="form" dir="${document.documentElement.dir}">${formHead(t(isOut?'form.out':'form.in'),no,m0.date)}
     <div class="meta"><div><b>${t(isOut?'form.receiver':'form.returner')}:</b> ${esc(mvPerson(m0))}</div><div><b>${t('f.project')}:</b> ${esc(mvProj(m0))}</div><div><b>${t('form.count')}:</b> ${ms.length}</div><div><b>${t('f.notes')}:</b> ${esc(isOut?m0.notes:'')}</div></div>
-    <table><thead><tr><th>${t('form.n')}</th><th>${t('col.code')}</th><th>${t('col.tool')}</th><th>${t('col.type')}</th>${isOut?'':`<th>${t('col.retCond')}</th><th>${t('col.note')}</th>`}</tr></thead><tbody>
-    ${ms.map((m,i)=>{const x=toolOf(m);return `<tr><td>${i+1}</td><td>${esc(x.code)}</td><td>${esc(x.name)}</td><td>${esc(v(x.category))}</td>${isOut?'':`<td>${esc(v(m.cond))}</td><td>${esc(m.notes)}</td>`}</tr>`}).join('')}</tbody></table>
+    <table><thead><tr><th>${t('form.n')}</th><th>${t('col.code')}</th><th>${t('col.tool')}</th><th>${t('f.qty')}</th><th>${t('col.type')}</th>${isOut?'':`<th>${t('col.retCond')}</th><th>${t('col.note')}</th>`}</tr></thead><tbody>
+    ${ms.map((m,i)=>{const x=toolOf(m);return `<tr><td>${i+1}</td><td>${esc(x.code)}</td><td>${esc(x.name)}${x.parts?`<div class="fparts">${esc(partsToCell(parseParts(x.parts)))}</div>`:''}</td><td>${x.qty?qtyOf(x):''}</td><td>${esc(v(x.category))}</td>${isOut?'':`<td>${esc(v(m.cond))}</td><td>${esc(m.notes)}</td>`}</tr>`}).join('')}</tbody></table>
     <p style="margin-top:14px">${t(isOut?'form.outText':'form.inText')}</p>
     <div class="sig"><div>${t(isOut?'form.receiver':'form.returner')}</div><div>${t('form.keeper')}</div><div>${t('form.approve')}</div></div></div>`}).join('');
   setTimeout(()=>window.print(),150);
@@ -261,12 +278,16 @@ function printForm(...nos){
 
 /* ---------- settings ---------- */
 function renderSettings(){
-  $('sUrl').value=LS.get('tm_url')||(window.APP_CONFIG&&APP_CONFIG.API_URL)||'';if(document.activeElement!==$('sKey'))$('sKey').value=LS.get('tm_key')||'';
   if(document.activeElement!==$('sCo'))$('sCo').value=S.settings.company||'';
   $('catList').innerHTML=S.settings.categories.map(c=>`<span class="chip" style="cursor:default;border-inline-start-width:1px">${esc(v(c))} <button class="b d sm" data-dcat="${esc(c)}" aria-label="delete">×</button></span>`).join('');
 }
-$('saveConn').onclick=()=>{LS.set('tm_url',$('sUrl').value.trim());LS.set('tm_key',$('sKey').value.trim());boot();};
-$('reload').onclick=()=>boot();
+/* ---------- one-time login ---------- */
+function showLogin(msg){$('login').hidden=false;$('loginErr').textContent=msg||'';setTimeout(()=>$('loginPass').focus(),50);}
+$('loginForm').addEventListener('submit',async e=>{e.preventDefault();const k=$('loginPass').value.trim();if(!k)return;
+  const btn=$('loginBtn');btn.disabled=true;$('loginErr').textContent='';
+  try{remote={url:APP_CONFIG.API_URL,key:k};S=fromSheet(await apiGet());LS.set('tm_key',k);saveCache();$('login').hidden=true;$('loginPass').value='';setSync('ok');banner('');render();}
+  catch(err){remote=null;$('loginErr').textContent=err.message===t('msg.badKey')?t('login.bad'):t('msg.loadFail')+' ('+err.message+')';}
+  finally{btn.disabled=false;}});
 const setOp=(key,value)=>up('settings',{key,value:String(value)});
 $('saveCo').onclick=busy($('saveCo'),async()=>{await commit([setOp('company',$('sCo').value.trim())]);render();toast(t('msg.saved'));});
 $('addCat').onclick=busy($('addCat'),async()=>{const c=$('sCat').value.trim();if(!c||S.settings.categories.includes(c))return;await commit([setOp('categories',[...S.settings.categories,c].join(','))]);$('sCat').value='';render();});
