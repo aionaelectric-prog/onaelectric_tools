@@ -277,3 +277,11 @@ $('restore').onchange=e=>{const f=e.target.files[0];if(!f)return;if(remote){toas
 /* ---------- start ---------- */
 $('outDate').value=$('retDate').value=$('mvDate').value=today();
 applyLang(); boot();
+
+/* ---------- burger menu ---------- */
+(function(){const burger=$('burger'),navEl=$('nav'),scrim=$('scrim');
+  const setMenu=o=>{navEl.classList.toggle('open',o);scrim.hidden=!o;burger.setAttribute('aria-expanded',String(o));};
+  burger.onclick=()=>setMenu(!navEl.classList.contains('open'));
+  scrim.onclick=()=>setMenu(false);
+  navEl.addEventListener('click',e=>{if(e.target.closest('button'))setMenu(false);});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')setMenu(false);});})();
