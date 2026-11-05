@@ -151,3 +151,6 @@ nav button.on{box-shadow:inset 3px 0 0 var(--pri)}
   .pool{max-height:none}
   h2{font-size:15px}
 }
+
+/* hide sync status unless there is an error */
+.sync:not(.err){display:none}
