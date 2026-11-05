@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ona Electric Tools</title>
+<script>(function(){try{var th=localStorage.getItem('tm_theme');if(th)document.documentElement.dataset.theme=th;if(localStorage.getItem('tm_lang')==='en'){document.documentElement.lang='en';document.documentElement.dir='ltr';}}catch(e){}})();</script>
+<link rel="icon" href="assets/logo.jpeg">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="brand"><img src="assets/logo.jpeg" alt="ONA Electric"><div><h1 data-i18n="appTitle"></h1><div class="co" id="coName"></div></div></div>
+  <nav id="nav">
+    <button data-p="dash" class="on" data-i18n="nav.dash"></button>
+    <button data-p="out" data-i18n="nav.out"></button>
+    <button data-p="ret" data-i18n="nav.ret"></button>
+    <button data-p="tools" data-i18n="nav.tools"></button>
+    <button data-p="cons" data-i18n="nav.cons"></button>
+    <button data-p="people" data-i18n="nav.people"></button>
+    <button data-p="projects" data-i18n="nav.projects"></button>
+    <button data-p="reports" data-i18n="nav.reports"></button>
+    <button data-p="settings" data-i18n="nav.settings"></button>
+  </nav>
+  <div class="tbar">
+    <span class="sync" id="sync"></span>
+    <button id="btnLang" title="Language"></button>
+    <button id="btnTheme" title="Theme"></button>
+  </div>
+</header>
+<main>
+<div class="banner hide" id="banner"></div>
+
+<section id="p-dash">
+  <img class="cover" src="assets/cover.jpeg" alt="ONA Electric Industries — Powering Progress, Connecting Possibilities">
+  <div class="stats" id="stats"></div>
+  <div class="grid2">
+    <div class="card"><h2 data-i18n="dash.out"></h2><div class="tw"><table><thead><tr><th data-i18n="col.tool"></th><th data-i18n="col.with"></th><th data-i18n="col.project"></th><th data-i18n="col.since"></th></tr></thead><tbody id="dashOut"></tbody></table></div></div>
+    <div class="card"><h2 data-i18n="dash.cons"></h2><div class="tw"><table><thead><tr><th data-i18n="col.item"></th><th data-i18n="col.remain"></th><th data-i18n="col.availPct"></th></tr></thead><tbody id="dashCons"></tbody></table></div></div>
+  </div>
+</section>
+
+<section id="p-out" class="hide">
+  <div class="card">
+    <h2 data-i18n="out.title"></h2>
+    <div class="row">
+      <div><label for="outPerson" data-i18n="f.receiver"></label><select id="outPerson"></select></div>
+      <div><label for="outProject" data-i18n="f.project"></label><select id="outProject"></select></div>
+      <div><label for="outDate" data-i18n="f.date"></label><input type="date" id="outDate"></div>
+      <div><label for="outNotes" data-i18n="f.notes"></label><input id="outNotes" style="min-width:220px"></div>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h2 data-i18n="out.avail"></h2>
+      <div class="row" style="margin-bottom:8px">
+        <div><label for="outSearch" data-i18n="f.search"></label><input id="outSearch" data-i18n-ph="ph.search"></div>
+        <div><label for="outCat" data-i18n="f.type"></label><select id="outCat"></select></div>
+      </div>
+      <div class="pool" id="pool"></div>
+    </div>
+    <div class="card">
+      <h2><span data-i18n="out.cart"></span> <span class="muted" id="cartCount"></span></h2>
+      <div class="drop" id="cart"></div>
+      <div class="row" style="margin-top:12px">
+        <button class="b" id="doOut" data-i18n="out.confirm"></button>
+        <button class="b s" id="clearCart" data-i18n="out.clear"></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="p-ret" class="hide">
+  <div class="card">
+    <h2 data-i18n="ret.title"></h2>
+    <div class="row" style="margin-bottom:10px">
+      <div><label for="retPerson" data-i18n="f.person"></label><select id="retPerson"></select></div>
+      <div><label for="retDate" data-i18n="f.retDate"></label><input type="date" id="retDate"></div>
+    </div>
+    <div class="tw"><table><thead><tr><th><input type="checkbox" id="retAll" style="min-width:0" aria-label="all"></th><th data-i18n="col.code"></th><th data-i18n="col.tool"></th><th data-i18n="col.type"></th><th data-i18n="col.with"></th><th data-i18n="col.project"></th><th data-i18n="col.outDate"></th><th data-i18n="col.retCond"></th><th data-i18n="col.note"></th></tr></thead><tbody id="retBody"></tbody></table></div>
+    <div class="row" style="margin-top:12px"><button class="b" id="doRet" data-i18n="ret.confirm"></button></div>
+  </div>
+</section>
+
+<section id="p-tools" class="hide">
+  <div class="card">
+    <h2 data-i18n="tools.add"></h2>
+    <div class="row">
+      <div><label for="tName" data-i18n="f.toolName"></label><input id="tName"></div>
+      <div><label for="tBrand" data-i18n="f.brand"></label><input id="tBrand" style="min-width:100px"></div>
+      <div><label for="tCat" data-i18n="f.type"></label><select id="tCat"></select></div>
+      <div><label for="tQty" data-i18n="f.qty"></label><input type="number" id="tQty" value="1" min="1" style="min-width:80px;width:90px"></div>
+      <div><label for="tLoc" data-i18n="f.location"></label><input id="tLoc" style="min-width:120px"></div>
+      <div><label for="tNotes" data-i18n="f.notes"></label><input id="tNotes"></div>
+      <button class="b" id="addTool" data-i18n="btn.add"></button>
+    </div>
+    <p class="muted" data-i18n="tools.hint"></p>
+  </div>
+  <div class="card">
+    <div class="row" style="margin-bottom:10px">
+      <div><label for="tSearch" data-i18n="f.search"></label><input id="tSearch"></div>
+      <div><label for="tFilterCat" data-i18n="f.type"></label><select id="tFilterCat"></select></div>
+      <div><label for="tFilterSt" data-i18n="f.status"></label><select id="tFilterSt"></select></div>
+    </div>
+    <div class="tw"><table><thead><tr><th data-i18n="col.code"></th><th data-i18n="col.tool"></th><th data-i18n="f.brand"></th><th data-i18n="col.type"></th><th data-i18n="f.status"></th><th data-i18n="col.with"></th><th data-i18n="f.location"></th><th></th></tr></thead><tbody id="toolsBody"></tbody></table></div>
+  </div>
+</section>
+
+<section id="p-cons" class="hide">
+  <div class="grid2">
+    <div class="card">
+      <h2 data-i18n="cons.add"></h2>
+      <div class="row">
+        <div><label for="cName" data-i18n="col.item"></label><input id="cName"></div>
+        <div><label for="cUnit" data-i18n="f.unit"></label><input id="cUnit" style="min-width:100px"></div>
+        <div><label for="cQty" data-i18n="f.initQty"></label><input type="number" id="cQty" value="0" style="min-width:90px;width:100px"></div>
+        <div><label for="cMin" data-i18n="f.minPct"></label><input type="number" id="cMin" value="20" style="min-width:70px;width:80px"></div>
+        <button class="b" id="addCons" data-i18n="btn.add"></button>
+      </div>
+    </div>
+    <div class="card">
+      <h2 data-i18n="cons.move"></h2>
+      <div class="row">
+        <div><label for="mvItem" data-i18n="col.item"></label><select id="mvItem"></select></div>
+        <div><label for="mvType" data-i18n="f.moveType"></label><select id="mvType"></select></div>
+        <div><label for="mvQty" data-i18n="f.qty"></label><input type="number" id="mvQty" value="1" style="min-width:80px;width:90px"></div>
+        <div><label for="mvProject" data-i18n="f.project"></label><select id="mvProject"></select></div>
+        <div><label for="mvPerson" data-i18n="f.person"></label><select id="mvPerson"></select></div>
+        <div><label for="mvDate" data-i18n="f.date"></label><input type="date" id="mvDate"></div>
+        <button class="b" id="doMove" data-i18n="btn.record"></button>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <h2 data-i18n="cons.stock"></h2>
+    <div class="tw"><table><thead><tr><th data-i18n="col.item"></th><th data-i18n="f.unit"></th><th class="num" data-i18n="col.in"></th><th class="num" data-i18n="col.used"></th><th class="num" data-i18n="col.remain"></th><th data-i18n="col.availPct"></th><th></th></tr></thead><tbody id="consBody"></tbody></table></div>
+  </div>
+  <div class="card">
+    <h2 data-i18n="cons.byProject"></h2>
+    <div class="tw"><table><thead><tr><th data-i18n="col.project"></th><th data-i18n="col.item"></th><th class="num" data-i18n="col.usedQty"></th><th class="num" data-i18n="col.pctOfItem"></th></tr></thead><tbody id="consProj"></tbody></table></div>
+  </div>
+</section>
+
+<section id="p-people" class="hide">
+  <div class="card">
+    <h2 data-i18n="people.add"></h2>
+    <div class="row">
+      <div><label for="pName" data-i18n="f.name"></label><input id="pName"></div>
+      <div><label for="pRole" data-i18n="f.role"></label><input id="pRole"></div>
+      <div><label for="pDept" data-i18n="f.dept"></label><input id="pDept"></div>
+      <div><label for="pPhone" data-i18n="f.phone"></label><input id="pPhone"></div>
+      <button class="b" id="addPerson" data-i18n="btn.add"></button>
+    </div>
+  </div>
+  <div class="card"><div class="tw"><table><thead><tr><th data-i18n="col.code"></th><th data-i18n="f.name"></th><th data-i18n="f.role"></th><th data-i18n="f.dept"></th><th data-i18n="f.phone"></th><th class="num" data-i18n="col.toolsNow"></th><th></th></tr></thead><tbody id="peopleBody"></tbody></table></div></div>
+</section>
+
+<section id="p-projects" class="hide">
+  <div class="card">
+    <h2 data-i18n="proj.add"></h2>
+    <div class="row">
+      <div><label for="prName" data-i18n="f.projName"></label><input id="prName"></div>
+      <div><label for="prLoc" data-i18n="f.location"></label><input id="prLoc"></div>
+      <button class="b" id="addProject" data-i18n="btn.add"></button>
+    </div>
+  </div>
+  <div class="card"><div class="tw"><table><thead><tr><th data-i18n="col.project"></th><th data-i18n="f.location"></th><th class="num" data-i18n="col.toolsNow"></th><th></th></tr></thead><tbody id="projBody"></tbody></table></div></div>
+</section>
+
+<section id="p-reports" class="hide">
+  <div class="card">
+    <h2 data-i18n="rep.title"></h2>
+    <div class="row" style="margin-bottom:10px">
+      <div><label for="rPerson" data-i18n="f.person"></label><select id="rPerson"></select></div>
+      <div><label for="rCat" data-i18n="f.type"></label><select id="rCat"></select></div>
+      <div><label for="rProject" data-i18n="f.project"></label><select id="rProject"></select></div>
+      <div><label for="rType" data-i18n="f.moveType"></label><select id="rType"></select></div>
+      <div><label for="rFrom" data-i18n="f.from"></label><input type="date" id="rFrom"></div>
+      <div><label for="rTo" data-i18n="f.to"></label><input type="date" id="rTo"></div>
+      <button class="b s" id="rCsv" data-i18n="rep.csv"></button>
+      <button class="b s" id="rPrint" data-i18n="rep.print"></button>
+    </div>
+    <div class="tw"><table><thead><tr><th class="num" data-i18n="col.formNo"></th><th data-i18n="f.date"></th><th data-i18n="f.moveType"></th><th data-i18n="col.code"></th><th data-i18n="col.tool"></th><th data-i18n="col.type"></th><th data-i18n="f.person"></th><th data-i18n="col.project"></th><th data-i18n="col.cond"></th><th data-i18n="col.note"></th><th></th></tr></thead><tbody id="rBody"></tbody></table></div>
+  </div>
+</section>
+
+<section id="p-settings" class="hide">
+  <div class="card">
+    <h2 data-i18n="set.conn"></h2>
+    <p class="muted" data-i18n="set.connHint"></p>
+    <div class="row">
+      <div style="flex:1;min-width:0"><label for="sUrl" data-i18n="set.url"></label><input id="sUrl" dir="ltr" placeholder="https://script.google.com/macros/s/.../exec" style="width:100%"></div>
+      <div><label for="sKey" data-i18n="set.key"></label><input id="sKey" type="password" dir="ltr"></div>
+      <button class="b" id="saveConn" data-i18n="set.connect"></button>
+      <button class="b s" id="reload" data-i18n="set.reload"></button>
+    </div>
+  </div>
+  <div class="card">
+    <h2 data-i18n="set.company"></h2>
+    <div class="row"><div><label for="sCo" data-i18n="set.coName"></label><input id="sCo" style="min-width:280px"></div><button class="b" id="saveCo" data-i18n="btn.save"></button></div>
+  </div>
+  <div class="card">
+    <h2 data-i18n="set.cats"></h2>
+    <div class="row"><div><label for="sCat" data-i18n="set.newCat"></label><input id="sCat"></div><button class="b" id="addCat" data-i18n="btn.add"></button></div>
+    <div id="catList" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px"></div>
+  </div>
+  <div class="card">
+    <h2 data-i18n="set.backup"></h2>
+    <p class="muted" data-i18n="set.backupHint"></p>
+    <div class="row">
+      <button class="b" id="backup" data-i18n="set.download"></button>
+      <div><label for="restore" data-i18n="set.restore"></label><input type="file" id="restore" accept=".json"></div>
+    </div>
+  </div>
+</section>
+</main>
+<div id="printArea"></div>
+<div class="toast" id="toast" role="status"></div>
+<script src="config.js"></script>
+<script src="i18n.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
