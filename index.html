@@ -6,7 +6,7 @@
 <title>Ona Electric Tools</title>
 <script>(function(){try{var th=localStorage.getItem('tm_theme');if(th)document.documentElement.dataset.theme=th;if(localStorage.getItem('tm_lang')==='en'){document.documentElement.lang='en';document.documentElement.dir='ltr';}}catch(e){}})();</script>
 <link rel="icon" href="logo.jpeg">
-<link rel="stylesheet" href="style.css?v=3">
+<link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
 <header>
@@ -30,6 +30,17 @@
   </div>
 </header>
 <div class="scrim" id="scrim" hidden></div>
+<div class="login" id="login" hidden>
+  <form class="login-box" id="loginForm" autocomplete="off">
+    <img src="logo.jpeg" alt="ONA Electric">
+    <h2 data-i18n="login.title"></h2>
+    <p class="muted" data-i18n="login.hint"></p>
+    <label for="loginPass" data-i18n="login.pass"></label>
+    <input id="loginPass" type="password" dir="ltr" required>
+    <div class="login-err" id="loginErr" role="alert"></div>
+    <button class="b" id="loginBtn" type="submit" data-i18n="login.btn"></button>
+  </form>
+</div>
 <main>
 <div class="banner hide" id="banner"></div>
 
@@ -92,8 +103,10 @@
       <div><label for="tBrand" data-i18n="f.brand"></label><input id="tBrand" style="min-width:100px"></div>
       <div><label for="tCat" data-i18n="f.type"></label><select id="tCat"></select></div>
       <div><label for="tQty" data-i18n="f.qty"></label><input type="number" id="tQty" value="1" min="1" style="min-width:80px;width:90px"></div>
+      <div><label for="tCopies" data-i18n="f.copies"></label><input type="number" id="tCopies" value="1" min="1" style="min-width:80px;width:90px"></div>
       <div><label for="tLoc" data-i18n="f.location"></label><input id="tLoc" style="min-width:120px"></div>
       <div><label for="tNotes" data-i18n="f.notes"></label><input id="tNotes"></div>
+      <div style="flex:1 1 280px"><label for="tParts" data-i18n="f.parts"></label><textarea id="tParts" rows="3" data-i18n-ph="ph.parts" style="width:100%"></textarea></div>
       <button class="b" id="addTool" data-i18n="btn.add"></button>
     </div>
     <p class="muted" data-i18n="tools.hint"></p>
@@ -104,7 +117,7 @@
       <div><label for="tFilterCat" data-i18n="f.type"></label><select id="tFilterCat"></select></div>
       <div><label for="tFilterSt" data-i18n="f.status"></label><select id="tFilterSt"></select></div>
     </div>
-    <div class="tw"><table><thead><tr><th data-i18n="col.code"></th><th data-i18n="col.tool"></th><th data-i18n="f.brand"></th><th data-i18n="col.type"></th><th data-i18n="f.status"></th><th data-i18n="col.with"></th><th data-i18n="f.location"></th><th></th></tr></thead><tbody id="toolsBody"></tbody></table></div>
+    <div class="tw"><table><thead><tr><th data-i18n="col.code"></th><th data-i18n="col.tool"></th><th class="num" data-i18n="f.qty"></th><th data-i18n="f.parts"></th><th data-i18n="f.brand"></th><th data-i18n="col.type"></th><th data-i18n="f.status"></th><th data-i18n="col.with"></th><th data-i18n="f.location"></th><th></th></tr></thead><tbody id="toolsBody"></tbody></table></div>
   </div>
 </section>
 
@@ -188,16 +201,6 @@
 
 <section id="p-settings" class="hide">
   <div class="card">
-    <h2 data-i18n="set.conn"></h2>
-    <p class="muted" data-i18n="set.connHint"></p>
-    <div class="row">
-      <div style="flex:1;min-width:0"><label for="sUrl" data-i18n="set.url"></label><input id="sUrl" dir="ltr" placeholder="https://script.google.com/macros/s/.../exec" style="width:100%"></div>
-      <div><label for="sKey" data-i18n="set.key"></label><input id="sKey" type="password" dir="ltr"></div>
-      <button class="b" id="saveConn" data-i18n="set.connect"></button>
-      <button class="b s" id="reload" data-i18n="set.reload"></button>
-    </div>
-  </div>
-  <div class="card">
     <h2 data-i18n="set.company"></h2>
     <div class="row"><div><label for="sCo" data-i18n="set.coName"></label><input id="sCo" style="min-width:280px"></div><button class="b" id="saveCo" data-i18n="btn.save"></button></div>
   </div>
@@ -216,10 +219,25 @@
   </div>
 </section>
 </main>
+<dialog id="toolDlg">
+  <form id="toolForm" method="dialog">
+    <h2 data-i18n="tools.edit"></h2>
+    <div class="row">
+      <div style="flex:1 1 220px"><label for="eName" data-i18n="f.toolName"></label><input id="eName" required></div>
+      <div><label for="eBrand" data-i18n="f.brand"></label><input id="eBrand"></div>
+      <div><label for="eCat" data-i18n="f.type"></label><select id="eCat"></select></div>
+      <div><label for="eQty" data-i18n="f.qty"></label><input type="number" id="eQty" min="1" style="min-width:80px;width:90px"></div>
+      <div><label for="eLoc" data-i18n="f.location"></label><input id="eLoc"></div>
+      <div style="flex:1 1 220px"><label for="eNotes" data-i18n="f.notes"></label><input id="eNotes"></div>
+      <div style="flex:1 1 100%"><label for="eParts" data-i18n="f.parts"></label><textarea id="eParts" rows="6" data-i18n-ph="ph.parts" style="width:100%"></textarea></div>
+    </div>
+    <div class="row" style="margin-top:12px"><button class="b" id="eSave" type="button" data-i18n="btn.save"></button><button class="b s" id="eCancel" type="button" data-i18n="btn.cancel"></button></div>
+  </form>
+</dialog>
 <div id="printArea"></div>
 <div class="toast" id="toast" role="status"></div>
-<script src="config.js?v=3"></script>
-<script src="i18n.js?v=3"></script>
-<script src="app.js?v=3"></script>
+<script src="config.js?v=5"></script>
+<script src="i18n.js?v=5"></script>
+<script src="app.js?v=5"></script>
 </body>
 </html>
